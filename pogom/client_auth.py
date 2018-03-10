@@ -6,7 +6,7 @@ import requests
 import urllib
 import datetime
 
-from flask import jsonify
+from flask import redirect
 from requests.exceptions import HTTPError
 
 log = logging.getLogger(__name__)
@@ -24,15 +24,13 @@ def check_auth(args, request, user_auth_code_cache):
         return redirect_to_discord_guild_invite(args)
       if args.uas_discord_required_roles and not valid_discord_guild_role(request, user_auth_code_cache, args):
         return redirect_to_discord_guild_invite(args)
-  return False
+  return None
 
 def redirect_client_to_auth(host, args):
-  d = {}
-  d['auth_redirect'] = 'https://discordapp.com/api/oauth2/authorize?client_id=' + args.uas_client_id + '&redirect_uri=' + urllib.quote(host + 'auth_callback') + '&response_type=code&scope=identify%20guilds'
-  return jsonify(d)
+  return redirect('https://discordapp.com/api/oauth2/authorize?client_id=' + args.uas_client_id + '&redirect_uri=' + urllib.quote(host + 'auth_callback') + '&response_type=code&scope=identify%20guilds')
 
 def valid_client_auth(request, host, user_auth_code_cache, args):
-  userAuthCode = request.args.get('userAuthCode')
+  userAuthCode = request.cookies.get('userAuthCode', request.args.get('userAuthCode'))
   if not userAuthCode:
     log.debug("no userAuthCode")
     return False
@@ -62,8 +60,8 @@ def valid_client_auth(request, host, user_auth_code_cache, args):
   return True
 
 def valid_discord_guild(request, user_auth_code_cache, args):
-  userAuthCode = request.args.get('userAuthCode')
-  guilds = user_auth_code_cache.get(userAuthCode)['guilds']
+  userAuthCode = request.cookies.get('userAuthCode')
+  guilds = user_auth_code_cache.get(userAuthCode, {}).get('guilds')
   required_guilds = [x.strip() for x in args.uas_discord_required_guilds.split(',')]
   for g in guilds:
     if g['id'] in required_guilds:
@@ -73,8 +71,8 @@ def valid_discord_guild(request, user_auth_code_cache, args):
   return False
 
 def valid_discord_guild_role(request, user_auth_code_cache, args):
-  userAuthCode = request.args.get('userAuthCode')
-  userRoles = user_auth_code_cache.get(userAuthCode)['roles']
+  userAuthCode = request.cookies.get('userAuthCode')
+  userRoles = user_auth_code_cache.get(userAuthCode, {}).get('roles')
   requiredRoles = [x.strip() for x in args.uas_discord_required_roles.split(',')]
   for r in userRoles:
     if r in requiredRoles:
@@ -84,9 +82,7 @@ def valid_discord_guild_role(request, user_auth_code_cache, args):
   return False
 
 def redirect_to_discord_guild_invite(args):
-  d = {}
-  d['auth_redirect'] = args.uas_discord_guild_invite
-  return jsonify(d)
+  return redirect(args.uas_discord_guild_invite)
 
 def exchange_code(code, host, args):
   data = {
