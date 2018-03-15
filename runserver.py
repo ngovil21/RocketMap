@@ -368,6 +368,7 @@ def main():
         app = Pogom(__name__,
                     root_path=os.path.dirname(
                               os.path.abspath(__file__)).decode('utf8'))
+        app.secret_key = args.secret_key
         app.before_request(app.validate_request)
         app.set_current_location(position)
 

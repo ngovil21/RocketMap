@@ -8,9 +8,8 @@ import gc
 from datetime import datetime
 from s2sphere import LatLng
 from bisect import bisect_left
-from flask import (Flask, abort, jsonify, render_template,
-                   request, make_response, redirect,
-                   send_from_directory, send_file)
+from flask import Flask, abort, jsonify, render_template, request, \
+    make_response, send_from_directory, send_file, redirect, session
 from flask.json import JSONEncoder
 from flask_compress import Compress
 from pogom.dyn_img import (get_gym_icon, get_pokemon_map_icon,
@@ -283,7 +282,7 @@ class Pogom(Flask):
 
         # Verify Authorization
         if args.user_auth_service and request.endpoint != 'auth_callback':
-            return check_auth(get_args(), request, self.user_auth_code_cache)
+            return check_auth(get_args(), request.url_root, session, self.user_auth_code_cache)
 
     def _ip_is_blacklisted(self, ip):
         if not self.blacklist:
@@ -336,7 +335,7 @@ class Pogom(Flask):
         code = request.args.get('code')
         if code:
             resp = make_response(redirect('/'))
-            resp.set_cookie(key='userAuthCode', value=code, max_age=60*60*24*7)
+            session['userAuthCode'] = code
             return resp
         else:
             abort(403)
