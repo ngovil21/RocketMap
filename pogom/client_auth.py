@@ -10,7 +10,6 @@ from flask import redirect
 from requests.exceptions import HTTPError
 
 log = logging.getLogger(__name__)
-log.setLevel('INFO')
 
 
 def check_auth(args, url_root, session, user_auth_code_cache):
