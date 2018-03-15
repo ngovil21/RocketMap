@@ -284,6 +284,9 @@ class Pogom(Flask):
         if args.user_auth_service and request.endpoint != 'auth_callback':
             return check_auth(get_args(), request.url_root, session, self.user_auth_code_cache)
 
+    def make_session_permanent(self):
+        session.permanent = True
+
     def _ip_is_blacklisted(self, ip):
         if not self.blacklist:
             return False

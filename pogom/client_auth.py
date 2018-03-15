@@ -55,12 +55,14 @@ def valid_client_auth(host, session, user_auth_code_cache, args):
     if not user_auth_code_cache[userAuthCode].get('guilds', False):
       user_auth_code_cache[userAuthCode]['guilds'] = get_user_guilds(user_auth_code_cache[userAuthCode]['access_token'])
       if not user_auth_code_cache[userAuthCode]['guilds']:
+        log.debug("Unable to access user guilds.")
         del user_auth_code_cache[userAuthCode]
         return False
     if args.uas_discord_required_roles:
       if not user_auth_code_cache[userAuthCode].get('roles', False):
         user_auth_code_cache[userAuthCode]['roles'] = get_user_guild_roles(user_auth_code_cache[userAuthCode]['access_token'], args)
         if not user_auth_code_cache[userAuthCode]['roles']:
+          log.debug("Unable to access user roles.")
           del user_auth_code_cache[userAuthCode]
           return False
   return True
