@@ -7,7 +7,6 @@ import logging
 import time
 import re
 import ssl
-from datetime import timedelta
 
 import requests
 

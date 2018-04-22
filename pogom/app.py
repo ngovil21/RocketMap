@@ -282,7 +282,8 @@ class Pogom(Flask):
 
         # Verify Authorization
         if args.user_auth_service and request.endpoint != 'auth_callback':
-            return check_auth(get_args(), request.url_root, session, self.user_auth_code_cache)
+            return check_auth(get_args(), request.url_root, session,
+                              self.user_auth_code_cache)
 
     def make_session_permanent(self):
         session.permanent = True
@@ -410,7 +411,7 @@ class Pogom(Flask):
 
         auth_redirect = check_auth(args, request, self.user_auth_code_cache)
         if auth_redirect:
-          return auth_redirect
+            return auth_redirect
         # Request time of this request.
         d['timestamp'] = datetime.utcnow()
 
